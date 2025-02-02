@@ -515,7 +515,7 @@ WHICH-CONTEXT is a string, either 'before' or 'after'"
         (let ((saved-point-content (deadgrep--save-point-content)))
           (progn
             (deadgrep-restart)
-            (deadgrep--restore-point (saved-point-content)))))))
+            (deadgrep--restore-point saved-point-content))))))
 
 (defun deadgrep-increment-before-context ()
   "Increment context before."
