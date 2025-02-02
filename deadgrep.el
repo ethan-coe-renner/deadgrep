@@ -482,6 +482,25 @@ with a text face property `deadgrep-match-face'."
 
   (deadgrep-restart))
 
+(defun deadgrep--save-point-content ()
+  "Save the content at the line at point.
+
+This is useful for jumping back to a particular line after deadgrep-restart."
+
+  ; First, we must ensure that we are on a match, we can do this with
+  ; 'deadgrep-forward-match followed by 'deadgrep-backward-match
+  (deadgrep-forward-match)
+  (deadgrep-backward-match)
+
+  (thing-at-point 'line t))
+
+(defun deadgrep--restore-point (saved-content)
+  "Jump to the first line containing SAVED-CONTENT."
+  (let ((new-point (search-forward saved-content nil t)))
+    (if new-point
+        (goto-char new-point)
+      (goto-char 0))))
+
 (defun deadgrep--update-context (which-context value)
   "Update the context WHICH-CONTEXT of deadgrep--context by VALUE.
 
@@ -493,7 +512,10 @@ WHICH-CONTEXT is a string, either 'before' or 'after'"
           (setq deadgrep--context (cons (+ before value) after)))
          ((and (string= which-context "after") (> (+ after value) -1))
           (setq deadgrep--context (cons before (+ after value)))))
-        (deadgrep-restart))))
+        (let ((saved-point-content (deadgrep--save-point-content)))
+          (progn
+            (deadgrep-restart)
+            (deadgrep--restore-point (saved-point-content)))))))
 
 (defun deadgrep-increment-before-context ()
   "Increment context before."
